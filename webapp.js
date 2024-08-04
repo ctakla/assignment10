@@ -6,7 +6,7 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const url = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.mongodb.net/Assignment10?retryWrites=true&w=majority';
+const url = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.r41lzxh.mongodb.net/';
 const dbName = 'Assignment10';
 
 app.use(bodyParser.urlencoded({ extended: true }));

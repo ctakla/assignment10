@@ -16,7 +16,10 @@ app.set('view engine', 'ejs');
 let db, collection;
 
 MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
-  if (err) return console.error(err);
+  if (err) {
+    console.error('Failed to connect to MongoDB', err);
+    process.exit(1);
+  }
   db = client.db(dbName);
   collection = db.collection('places');
   console.log('Connected to MongoDB Atlas');

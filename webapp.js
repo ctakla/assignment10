@@ -7,7 +7,6 @@ const app = express();
 const port = process.env.PORT || 3000;
 const uri = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.r41lzxh.mongodb.net/';
 
-// Middleware to parse request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -32,32 +31,24 @@ async function main() {
             res.sendFile(path.join(__dirname, 'views', 'home.html'));
         });
 
-        // Handle form submission from home.html
-        app.post('/submit', async (req, res) => {
-            const formData = req.body;
-            try {
-                await collection.insertOne(formData);
-                res.redirect('/results-page');
-            } catch (err) {
-                console.error("Error inserting data:", err);
-                res.status(500).send("Internal Server Error");
-            }
-        });
+        // Process route
+        app.post('/process', async (req, res) => {
+            const input = req.body.input;
+            let query;
 
-        // Results route
-        app.get('/results', async (req, res) => {
+            if (/^\d/.test(input)) {
+                query = { zipCode: input };
+            } else {
+                query = { place: input };
+            }
+
             try {
-                const results = await collection.find({}).toArray();
-                res.json(results);
+                const results = await collection.find(query).toArray();
+                res.render('results', { results });
             } catch (err) {
                 console.error("Error fetching data:", err);
                 res.status(500).send("Internal Server Error");
             }
-        });
-
-        // Serve results.html
-        app.get('/results-page', (req, res) => {
-            res.sendFile(path.join(__dirname, 'views', 'results.html'));
         });
 
         app.listen(port, () => {

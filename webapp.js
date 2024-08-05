@@ -8,29 +8,24 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'views')));
 
 const uri = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.r41lzxh.mongodb.net/Assignment10?retryWrites=true&w=majority&appName=Cluster0';
-async function main() {
-    const client = new MongoClient(uri, {
-        serverApi: {
-            version: ServerApiVersion.v1,
-            strict: true,
-            deprecationErrors: true,
-        },
-        ssl: true,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    });
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
 
+async function main() {
     try {
         await client.connect();
-        console.log("Connected to MongoDB");
+        console.log('Connected to MongoDB');
     } catch (err) {
-        console.error("Connection error:", err);
-    } finally {
-        await client.close();
+        console.error('Connection error:', err);
     }
 }
 
-main().catch(console.error);
+main();
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

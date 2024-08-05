@@ -1,16 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Result</title>
+    <meta charset="UTF-8">
+    <title>Results Page</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Result</h1>
-  <p id="result"></p>
-  <a href="/">Go back</a>
-  <script>
-    const result = JSON.parse('<%- JSON.stringify(result) %>');
-    document.getElementById('result').innerText = `Place: ${result.place}, Zips: ${result.zips.join(', ')}`;
-  </script>
+    <h1>Results</h1>
+    <div id="results">
+        <% if (results.length === 0) { %>
+            <p>No results found.</p>
+        <% } else { %>
+            <ul>
+                <% results.forEach(result => { %>
+                    <li>Place: <%= result.place %>, Zip Code: <%= result.zipCode %></li>
+                <% }); %>
+            </ul>
+        <% } %>
+    </div>
 </body>
 </html>

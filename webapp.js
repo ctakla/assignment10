@@ -1,53 +1,73 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 3000;
+const uri = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.r41lzxh.mongodb.net/';
 
-const url = 'mongodb+srv://taklatina:pepsimaxi1!@cluster0.r41lzxh.mongodb.net/';
-const dbName = 'Assignment10';
-
+// Middleware to parse request bodies
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use(bodyParser.json());
 
-let db, collection;
+async function main() {
+    const client = new MongoClient(uri, {
+        serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+        }
+    });
 
-MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client) => {
-  if (err) {
-    console.error('Failed to connect to MongoDB', err);
-    process.exit(1);
-  }
-  db = client.db(dbName);
-  collection = db.collection('places');
-  console.log('Connected to MongoDB Atlas');
-});
+    try {
+        await client.connect();
+        console.log("Connected to MongoDB");
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'home.html'));
-});
+        const db = client.db('Assignment10');  // Replace with your database name
+        const collection = db.collection('places');  // Replace with your collection name
 
-app.post('/process', async (req, res) => {
-  const query = req.body.query;
-  const isZip = !isNaN(query.charAt(0));
+        // Home route
+        app.get('/', (req, res) => {
+            res.sendFile(path.join(__dirname, 'views', 'home.html'));
+        });
 
-  let result;
-  if (isZip) {
-    result = await collection.findOne({ zips: query });
-  } else {
-    result = await collection.findOne({ place: query });
-  }
+        // Handle form submission from home.html
+        app.post('/submit', async (req, res) => {
+            const formData = req.body;
+            try {
+                await collection.insertOne(formData);
+                res.redirect('/results-page');
+            } catch (err) {
+                console.error("Error inserting data:", err);
+                res.status(500).send("Internal Server Error");
+            }
+        });
 
-  if (result) {
-    res.render('result', { result });
-  } else {
-    res.send('No results found');
-  }
-});
+        // Results route
+        app.get('/results', async (req, res) => {
+            try {
+                const results = await collection.find({}).toArray();
+                res.json(results);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                res.status(500).send("Internal Server Error");
+            }
+        });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+        // Serve results.html
+        app.get('/results-page', (req, res) => {
+            res.sendFile(path.join(__dirname, 'views', 'results.html'));
+        });
+
+        app.listen(port, () => {
+            console.log(`Server running on port ${port}`);
+        });
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
+    }
+}
+
+main().catch(console.error);
 
